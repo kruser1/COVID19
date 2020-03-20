@@ -23,6 +23,6 @@ This graphic was made before confirmed case data was added to *cases_air_pop_dat
 
 <h4>Tableau</h4>
 
-This animated map shows how the confirmed cases appeared throughout the country.
+This animated map shows how the confirmed cases appeared throughout the country. Click to play.
 
 [![Coronavirus Map](http://img.youtube.com/vi/WsLjAnX0eFw/0.jpg)](http://www.youtube.com/watch?v=WsLjAnX0eFw "Coronavirus Map")
