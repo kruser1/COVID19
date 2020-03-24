@@ -36,13 +36,13 @@ A higher **rILI-** indicates more people have flu-like symptoms with an unknown 
 
 This project uses time series analysis and forecasting to predict states' **rILI-** for the weeks from November 17, 2019 until now. Currently, November 17, 2019 is widely believed to be the earliest date the first human could have had COVID-19. The predictions were based on time series data from Week 40 of 2010 until Week 47 of 2019 (which ended on November 17). For each state, we constructed 95% and 99% prediction intervals based on an ETS model using R's **forecast** package. We chose ETS over ARIMA after comparing the two's performance on a train/test split, but we expect both would produce similar forecasted prediction intervals.
 
-![Alabama's rILI- 99% P.I.](Alabama-rILI-99.png)
+![Alabama's rILI- 99% P.I.](images/Alabama-rILI-99.PNG)
 
 Above, we see the plot for Alabama. The black data line is the weekly observed data before November 17, 2019. The red line is the weekly observed data after November 17, 2019. The gray area to the right shows our forecasted 99% prediction interval. Based on the data prior to November 17, 2019 (and under the same circumstances), we expect 99% of  data points after November 17, 2019 to be in the gray area (our 99% prediction interval). If the observed data points fall outside of our prediction interval, then we have strong evidence the circumstances have changed and something fishy is going on. This does not seem to be the case for Alabama as all the observed data points are comfortably within the prediction intervals.
 
 Maine is a different story...
 
-![Maine's rILI- 99% P.I.](Maine-rILI-99.png)
+![Maine's rILI- 99% P.I.](images/Maine-rILI-99.PNG)
 
 Before jumping to conclusions, it's important to keep in mind that there are **many** potential caveats. For example, it's possible some these people in Maine were seeing a lot about coronavirus on the news and started going to the doctor in December 2019 when they previously wouldn't have. It's also possible that some other non-flu, non-COVID-19 illness swept through Maine in late 2019.
 
