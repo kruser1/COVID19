@@ -1,7 +1,7 @@
 # COVID19
 
 <h2>COVID-19: Early Signs</h2>
- A project for analyzing the likelihood of coronavirus presence in a state prior to the date of the first confirmed case. Project details below.
+ A project for analyzing the likelihood of coronavirus presence in a state prior to the date of the first confirmed case. File description, disclaimer, and project details below.
 
 <h3>File description:</h3>
 
@@ -11,11 +11,11 @@
 
 **state-data-2020-03-20.csv** - Holds data related to influenza-like illness by state. Data is pulled from https://github.com/reichlab/ncov/tree/master/analyses/ili-data.
 
-**state-data-2020-03-20-ROUNDED.csv** - Same data as *state-data-2020-03-20.csv* except the column **rili_minus** is rounded to three decimal places to build models quicker.
+**state-data-2020-03-20-ROUNDED.csv** - Same data as *state-data-2020-03-20.csv* except the column **rili_minus** is rounded to three decimal places to build models quicker. Should edit code to round in R.
 
 **region-data-2020-03-20.csv** - Holds data related to influenza-like illness by region. Data is pulled from https://github.com/reichlab/ncov/tree/master/analyses/ili-data.
 
-**region-data-2020-03-20-ROUNDED.csv** - Same data as *region-data-2020-03-20.csv* except the column **rili_minus** is rounded to three decimal places to build models quicker.
+**region-data-2020-03-20-ROUNDED.csv** - Same data as *region-data-2020-03-20.csv* except the column **rili_minus** is rounded to three decimal places to build models quicker. Should edit code to round in R.
 
 **states-first-confirmed.csv** - Holds the date of each state's first confirmed case of COVID-19. Source: https://www.nytimes.com/interactive/2020/03/21/us/coronavirus-us-cases-spread.html on 3/22/2020.
 
@@ -38,7 +38,7 @@ This project uses time series analysis and forecasting to predict states' **rILI
 
 ![Alabama's rILI- 99% P.I.](images/Alabama-rILI-99.PNG)
 
-Above, we see the plot for Alabama. The black data line is the weekly observed data before November 17, 2019. The red line is the weekly observed data after November 17, 2019. The gray area to the right shows our forecasted 99% prediction interval. Based on the data prior to November 17, 2019 (and under the same circumstances), we expect 99% of  data points after November 17, 2019 to be in the gray area (our 99% prediction interval). If the observed data points fall outside of our prediction interval, then we have strong evidence the circumstances have changed and something fishy is going on. This does not seem to be the case for Alabama as all the observed data points are comfortably within the prediction intervals.
+Above, we see the plot for Alabama. The black data line is the weekly observed data before November 17, 2019. The red line is the weekly observed data after November 17, 2019. The gray area to the right shows our forecasted 99% prediction interval. Based on the data prior to November 17, 2019 (and under the same circumstances), we expect 99% of  data points after November 17, 2019 to be in the gray area (our 99% prediction interval). If the observed data points fall outside of our prediction interval, then we have strong evidence the circumstances have changed and *something* suspicious is going on. This does not seem to be the case for Alabama as all the observed data points are comfortably within the prediction intervals.
 
 Maine is a different story...
 
@@ -46,4 +46,6 @@ Maine is a different story...
 
 Before jumping to conclusions, it's important to keep in mind that there are **many** potential caveats. For example, it's possible some these people in Maine were seeing a lot about coronavirus on the news and started going to the doctor in December 2019 when they previously wouldn't have. It's also possible that some other non-flu, non-COVID-19 illness swept through Maine in late 2019.
 
-However, Maine's observed data is consistently and significantly outside of the 99% prediction interval, which provides strong evidence that *something* was going on starting in December 2019, two and a half months before the state's first confirmed case of COVID-19. This analysis doesn't prove anything, but it may provide motivation for further research into when COVID-19 actually spread to Maine and other states. It's impossible to know for certain in the absence of more data.
+However, Maine's observed data is consistently and significantly outside of the 99% prediction interval, which provides strong evidence that ***something*** was going on starting in December 2019, two and a half months before the state's first confirmed case of COVID-19. This analysis doesn't prove anything, but it may provide motivation for further research into when COVID-19 actually spread to Maine and other states. It's impossible to know for certain in the absence of more data.
+
+Other states' plots available here: https://github.com/kruser1/COVID19/blob/master/COVID19-early-signs/state-forecasts-99-pi.pdf. Some locations are not included due to lack of data. Others have flat/meaningless graphs due to bad data.

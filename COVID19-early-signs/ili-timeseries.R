@@ -1,6 +1,8 @@
 #ili-timeseries.R
 #NOTE: locations with unusable rILI- data: FL, NYC, NJ, RI
 
+# TODO: Shift data so points show up on end of given week instead of beginning
+
 # 1) load libarries
 
 library(forecast)
