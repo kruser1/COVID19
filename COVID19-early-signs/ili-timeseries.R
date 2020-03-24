@@ -65,12 +65,14 @@ forecasts_to_pdf <- function(data, states, fileloc) {
   path = fileloc
   pdf(file=path)
   par(mfrow=c(2,1))
+  freq = 365.25/7
+  shift = 1/freq #shift x axis back because data is by start of week instead of end
+  shift
   for (loc in states) {
     title = paste(loc, "99% Confidence Forecast of rILI-*")
     subtitle = "*rILI-: a metric indicating the rate and amount of people seeking\ncare for flu-like symptoms and test negative for flu"
     f = ets_forecasts_all[[loc]]
     a = observed_all[[loc]]
-    xax = c(2019,2019.25,2019.5, 2019.75,2020,2020.25)
     xlabels=c("\nJanuary\n2019","April\n2019","July\n2019","October\n2019","January\n2020","April\n2020")
     plot(f, xlim=c(2018.9,2020.2),ylim=c(0,max(a)), main=title, sub=subtitle, fcol=NULL,ylab="rILI-",xaxt="none")
     axis(1, at=xax,labels=xlabels, line=.25, col="white")
@@ -79,7 +81,7 @@ forecasts_to_pdf <- function(data, states, fileloc) {
     lines(head(a,477), col='black') #run as safety to ensure we are using the correct data
     legend(2018.9,max(a)*.97, legend=c("Before Nov 17, 2019","After Nov 17, 2019"), col=c("black","red"), lty=c(1,1), cex=.7, bg='lightgray')
     d = subset(dates, dates$state==loc, select=c(first_case_date))
-    dd = decimal_date(ymd(d[1,1]))
+    dd = decimal_date(ymd(d[1,1])) - shift
     d = ymd(d[1,1])
     abline(v=dd, col="black",lwd=2, lty=c(2))
     text(dd-.01, max(a)*.89, paste("First\nConfirmed\nCase",format(d, format="%B %d, %Y"),sep="\n"),font=2, cex=.6, adj=c(1))
@@ -146,7 +148,7 @@ for (state in states) {
 }
 
 #save to PDF (change path)
-path = "C:\\Users\\Kruse\\Desktop\\ILI Time Series\\state-forecasts.pdf"
+path = "C:\\Users\\Kruse\\Documents\\GitHub\\COVID19\\COVID19-early-signs\\state-forecasts-99-pi.pdf"
 forecasts_to_pdf(dat,states, path)
 
 ######################################################

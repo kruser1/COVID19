@@ -5,8 +5,6 @@
 
 <h3>File description:</h3>
 
-**states-forecasts-95-pi.pdf** - Has plots of all states in our dataset. Plots show forecasted **rILI-** using a 95% prediction interval, observed data, and the date of the state's first confirmed case of COVID-19. Does not include Florida, New Jersey, or Rhode Island due to lack of data.
-
 **states-forecast-99-pi.pdf** - Has plots of all states in our dataset. Plots show forecasted **rILI-** using a 99% prediction interval, observed data, and the date of the state's first confirmed case of COVID-19. Does not include Florida, New Jersey, or Rhode Island due to lack of data.
 
 **state-data-2020-03-20.csv** - Holds data related to influenza-like illness by state. Data is pulled from https://github.com/reichlab/ncov/tree/master/analyses/ili-data.
@@ -34,7 +32,7 @@ The goal of this project is to use the metric **rILI-** to identify states in th
 
 A higher **rILI-** indicates more people have flu-like symptoms with an unknown cause. Therefore, a higher **rILI-** may provide evidence for the presence of some other virus, such as the 2019 coronavirus.
 
-This project uses time series analysis and forecasting to predict states' **rILI-** for the weeks from November 17, 2019 until now. Currently, November 17, 2019 is widely believed to be the earliest date the first human could have had COVID-19. The predictions were based on time series data from Week 40 of 2010 until Week 47 of 2019 (which ended on November 17). For each state, we constructed 95% and 99% prediction intervals based on an ETS model using R's **forecast** package. We chose ETS over ARIMA after comparing the two's performance on a train/test split, but we expect both would produce similar forecasted prediction intervals.
+This project uses time series analysis and forecasting to predict states' **rILI-** for the weeks from November 17, 2019 until now. Currently, November 17, 2019 is widely believed to be the earliest date the first human could have had COVID-19. The predictions were based on time series data from Week 40 of 2010 until Week 47 of 2019 (which ended on November 17). For each state, we constructed a 99% prediction interval based on an ETS model using R's **forecast** package. We chose ETS over ARIMA after comparing the two's performance on a train/test split, but we expect both would produce similar forecasted prediction intervals.
 
 ![Alabama's rILI- 99% P.I.](images/Alabama-rILI-99.PNG)
 
