@@ -71,7 +71,8 @@ forecasts_to_pdf <- function(data, states, fileloc) {
   for (loc in states) {
     title = paste(loc, "99% Confidence Forecast of rILI-*")
     subtitle = "*rILI-: a metric indicating the rate and amount of people seeking\ncare for flu-like symptoms and test negative for flu"
-    f = ets_forecasts_all[[loc]]
+    #f = ets_forecasts_all[[loc]]
+    f = tbats_forecasts_all[[loc]]
     a = observed_all[[loc]]
     xlabels=c("\nJanuary\n2019","April\n2019","July\n2019","October\n2019","January\n2020","April\n2020")
     plot(f, xlim=c(2018.9,2020.2),ylim=c(0,max(a)), main=title, sub=subtitle, fcol=NULL,ylab="rILI-",xaxt="none")
@@ -88,6 +89,30 @@ forecasts_to_pdf <- function(data, states, fileloc) {
   }
   #save to file
   dev.off()
+}
+
+mape <- function(actual,pred) {
+  mape <- mean(abs((actual - pred)/actual))*100
+  return(mape)
+}
+
+getForecasts <- function(series,h) {
+  fc = hash()
+  print("naive")
+  fc[['naive']] = naive(series,h=h)
+  print("es")
+  fc[['exp_smooth']] = ses(series,h=h)
+  print("holt")
+  fc[['holt']] = holt(series, h=h)
+  print("arima")
+  m= auto.arima(series)
+  fc[['arima']] = forecast(m, h=h)
+  print("tbats")
+  m = tbats(series)
+  fc[['tbats']] = forecast(m, h=h)
+  print("stlf")
+  fc[['stlf']] = stlf(series,h=h)
+  return(fc)
 }
 
 compare_arima_ets <- function(trainSet, testSet) {
@@ -117,8 +142,9 @@ see_arima_ets_comparisons <- function(arima, ets, data) {
 }
 
 ######################################################
-# 4) build forecasts and write to PDF
+# 4) build forecasts using TBATS and write to PDF
 #NOTE: change path variable for your own computer
+#NOTE: can change code to use ETS, ARIMA, or other forecasting methods if desired
 
 #make list of all locations with data
 states = unique(dat$region)
@@ -134,7 +160,9 @@ for (s in states) {
   }
 }
 
+
 ets_forecasts_all = hash()
+tbats_forecasts_all = hash()
 observed_all = hash()
 for (state in states) {
   #let test set be the last 48 points of 'before' set
@@ -142,60 +170,55 @@ for (state in states) {
   d = get_data(state, dat)
   before = d[['before']]
   temp_all = d[['all']]
-  temp_ets = forecast(before, h=16, level=c(99)) #forecast the 16 weeks after Nov 17, 2019 - use 99% prediction interval
-  ets_forecasts_all[[state]] = temp_ets #add forecasts to hash to allow additional plotting, if desired
+  #temp_ets = forecast(before, h=16, level=c(99)) #forecast the 16 weeks after Nov 17, 2019 - use 99% prediction interval
+  temp_tbats = tbats(before)
+  temp_forecast = forecast(temp_tbats, h=16, level=c(99))
+  tbats_forecasts_all[[state]] = temp_forecast
+  #ets_forecasts_all[[state]] = temp_ets #add forecasts to hash to allow additional plotting, if desired
   observed_all[[state]] = temp_all #add all observed data to hash to allow additional plotting, if desired
 }
 
+for (state in states) {
+  print(state)
+  print(tail(tbats_forecasts_all[[state]]))
+}
+
 #save to PDF (change path)
-path = "C:\\Users\\Kruse\\Documents\\GitHub\\COVID19\\COVID19-early-signs\\state-forecasts-99-pi.pdf"
+path = "C:\\Users\\Kruse\\Documents\\GitHub\\COVID19\\COVID19-early-signs\\state-forecasts-tbats-99-pi.pdf"
 forecasts_to_pdf(dat,states, path)
 
 ######################################################
-#code for testing auto.arima vs ETS
-#conclusion: some states are forecasted better using different methods, prediction intervals are similar
-  # ... MAPE/MASE were generally better for ETS, so we move forward with ETS
+#code for testing various forecasting models and selecting the best based on 
+  # ... the model's MAPE in predicting the 16 weeks before November 17, 2019
 
-d = get_data("California", dat)
-before = d[['before']]
-trainSet = head(before,429)
-testSet = tail(before,48)
-allData = d[['all']]
-lines(allData,col='red')
-
-#pick 12 random states to compare forecasting methods
-arima_forecasts = hash()
-ets_forecasts = hash()
+states_mapes = hash()
 for (state in c("Minnesota","California","Delaware","Colorado","Iowa","Georgia","South Dakota",
-                "Pennsylvania","Tennessee","Maryland","Hawaii","Alabama")) {
+               "Pennsylvania","Tennessee","Maryland","Hawaii","Alabama")) {
   #let test set be the last 48 points of 'before' set
   print(state)
   d = get_data(state, dat)
   before = d[['before']]
-  trainSet = head(before,445)
-  testSet = tail(before,32)
-  allData = d[['all']]
-  results = compare_arima_ets(trainSet,testSet)
-  arima_forecasts[[state]] = results[['arima']]
-  ets_forecasts[[state]] = results[['ets']]
+  trainSet = head(before,461)
+  f = getForecasts(trainSet, 16)
+  testSet = tail(before,16)
+  mapes = hash()
+  for (x in keys(f)) {
+    df_f = as.data.frame(f[[x]])
+    mapes[[x]] = mape(testSet, df_f$`Point Forecast`)
+  }
+  states_mapes[[state]] = mapes
+}
+mapes = hash()
+for (x in keys(f)) {
+  print(x)
+  df_f = as.data.frame(f[[x]])
+  print(df_f$'Point Forecast')
+  mapes[[x]] = mape(testSet, df_f$`Point Forecast`)
+}
+for (state in keys(states_mapes)) {
+  print(state)
+  print(states_mapes[[state]])
 }
 
-#plot comparison
-  #arima better: MN, CA, PE
-  #ets better: CO, IA, GA, SD, TE
-  #about same: DE (both bad but PI are fine), MD (both bad but PI are fine), HI (both bad but PI fine), AL (both good)
-#MAPE/MASE comparison
-  #arima better: MN, PE, CA, AL
-  #ets better: SD, TE, MD (bad), IA, HI, GA, DE, CO
-
-#see plots of arima and ETS
-loc = "Alabama"
-par(mfrow=c(1,1))
-d = get_data(loc, dat)
-allData = head(d[['all']],477)
-plot(arima_forecasts[[loc]])
-lines(allData,col='red')
-plot(ets_forecasts[[loc]])
-lines(allData,col='red')
 
 #######################################################
