@@ -11,6 +11,7 @@ library(hash)
 library(lubridate)
 library(tseries)
 library(imputeTS)
+library(stats)
 
 #####################################################
 # 2) load data - DATA SOURCE: https://github.com/reichlab/ncov/tree/master/analyses/ili-data (3/21/2020)
@@ -148,7 +149,9 @@ see_arima_ets_comparisons <- function(arima, ets, data) {
 
 #make list of all locations with data
 states = unique(dat$region)
-removeList = c("Florida", "New York City","New Jersey","Rhode Island")
+removeList = c("Florida", "New York City","New Jersey","Rhode Island",
+               "District of Columbia","New Hampshire",
+               "Puerto Rico","Virgin Islands")
 index = 1
 for (s in states) {
   if (s %in% removeList) {
@@ -172,11 +175,16 @@ for (state in states) {
   temp_all = d[['all']]
   #temp_ets = forecast(before, h=16, level=c(99)) #forecast the 16 weeks after Nov 17, 2019 - use 99% prediction interval
   temp_tbats = tbats(before)
-  temp_forecast = forecast(temp_tbats, h=16, level=c(99))
+  temp_forecast = forecast(temp_tbats, h=16, level=c(99.9))
   tbats_forecasts_all[[state]] = temp_forecast
   #ets_forecasts_all[[state]] = temp_ets #add forecasts to hash to allow additional plotting, if desired
   observed_all[[state]] = temp_all #add all observed data to hash to allow additional plotting, if desired
 }
+
+plot(tbats_forecasts_all[['South Dakota']], ylim=c(0,5),fcol=NULL,  xlim=c(2014,2020),
+     main="South Dakota 6 Year Plot and 99.9% Prediction Interval", ylab="rILI-")
+lines(observed_all[['South Dakota']],col='black')
+plot(observed_all[['South Dakota']])
 
 for (state in states) {
   print(state)
@@ -184,7 +192,7 @@ for (state in states) {
 }
 
 #save to PDF (change path)
-path = "C:\\Users\\Kruse\\Documents\\GitHub\\COVID19\\COVID19-early-signs\\state-forecasts-tbats-99-pi.pdf"
+path = "C:\\Users\\Kruse\\Documents\\GitHub\\COVID19\\COVID19-early-signs\\state-forecasts-99-9-pi.pdf"
 forecasts_to_pdf(dat,states, path)
 
 ######################################################
@@ -220,5 +228,55 @@ for (state in keys(states_mapes)) {
   print(states_mapes[[state]])
 }
 
-
 #######################################################
+#further validation of forecasts to address multiple comparisons
+#using 99.9% prediction intervals, we expect 0.1% of our observed
+  # ... data to fall outside of the intervals
+  # ... We see 30/736 outside of the intervals
+  # ... We expected to see .736 outside
+out = 0
+total = 0
+for (state in states) {
+  for (row in 1:nrow(comp)) {
+    comp = data.frame(1:16)
+    comp[['upper']] = tbats_forecasts_all[[state]]$upper
+    comp[['observed']] = tail(observed_all[[state]],16)
+    if (comp[row,3] > comp[row,2]) {
+      out = out + 1
+    }
+    total = total + 1
+  }
+}
+print(paste("total data points predicted:",total))
+print(paste("data points outside of prediction interval:",out))
+print(paste("expected data points outside of interval:",total*.001))
+
+binom.test(out,total,p=.001,alternative = "greater")
+
+#because our data likely violates a necessary assumption of
+  # ... binomial test (independent data points), we run another test
+  # ... limiting each state to a maximum of one success (very conservative)
+
+out = 0
+total = 0
+for (state in states) {
+  already = FALSE
+  for (row in 1:nrow(comp)) {
+    comp = data.frame(1:16)
+    comp[['upper']] = tbats_forecasts_all[[state]]$upper
+    comp[['observed']] = tail(observed_all[[state]],16)
+    if (comp[row,3] > comp[row,2] && already == FALSE) {
+      out = out + 1
+      already = TRUE
+    }
+    total = total + 1
+  }
+  #total = total + 1
+}
+print(paste("total states predicted:",total))
+print(paste("states outside of prediction interval:",out))
+print(paste("expected data poins outside of interval:",total*.001))
+binom.test(out,total,p=.001,alternative = "greater")
+
+
+
